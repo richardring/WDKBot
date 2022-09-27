@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="workflow-bot-app">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/workflow-bot-app.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -1,0 +1,127 @@
+id: blast
+
+variables:
+  message: ""
+  attachment: []
+
+activities:
+  - send-message:
+      id: menu
+      on:
+        message-received:
+          content: blast
+      content:
+        template: menu.ftl
+
+  - pin-message:
+      id: pinMenu
+      message-id: ${menu.outputs.message.messageId}
+
+# Workaround until if statements can be used with form-replied
+  - execute-script:
+      id: workAround
+      on:
+        form-replied:
+          form-id: menu
+      script: |
+
+  - send-message:
+      id: replayMenu
+      if: ${menu.action=='menu'}
+      on:
+        activity-completed:
+          activity-id: workAround
+      content:
+        template:
+          menu.ftl
+
+  - send-message:
+      id: create
+      if: ${menu.action=='create'}
+      on:
+        activity-completed:
+          activity-id: workAround
+      content:
+        template:
+          create.ftl
+
+#  - update-message:
+  - send-message:
+      id: getMessage
+#      message-id: ${create.outputs.msgId}
+      on:
+        form-replied:
+          form-id: create
+      content: "Now post your message to this room that you wish to send and include any attachments."
+
+  - execute-script:
+      id: storeMessage
+      on:
+        message-received: {}
+      script: |
+        variables.message = wdk.text(event.source.message.message)
+        variables.attachment = event.source.message.messageId
+
+  - send-message:
+      id: confirmMessage
+      on:
+         activity-completed:
+           activity-id: storeMessage
+      content: |
+        <messageML>
+        You are sending the following to ${create.ContactList} using ${create.Template}:
+        <expandable-card state="expanded">
+        <body variant="default">${variables.message}</body>
+        </expandable-card>
+        <form id="confirmMessage">
+        <button name="cancel" type="action" class="secondary">Cancel</button>
+        <button name="send" type="action">Send</button>
+        </form>
+        </messageML>
+      attachments:
+        - message-id: ${variables.attachment}
+
+
+  # Workaround until if statements can be used with form-replied
+  - execute-script:
+      id: workAround2
+      on:
+        form-replied:
+          form-id: confirmMessage
+      script: |
+
+  - update-message:
+      id: cancel
+      if: ${confirmMessage.action=='cancel'}
+      message-id: ${confirmMessage.outputs.msgId}
+      on:
+        activity-completed:
+          activity-id: workAround2
+      content: Cancelled
+
+  - send-message:
+      id: sendPending
+      if: ${confirmMessage.action=='send'}
+      on:
+        activity-completed:
+          activity-id: workAround2
+      content: Sending...
+
+  - send-message:
+      id: sendList
+      on:
+        activity-completed:
+          activity-id: sendPending
+      to:
+        stream-id: "4QuCIKOG5QQFFdOw-PEvUn___nyAl5cddA"
+      content: ${variables.message}
+      attachments:
+        - message-id: ${variables.attachment}
+
+  - update-message:
+      id: sendConfirm
+      message-id: ${sendPending.outputs.msgId}
+      on:
+        activity-completed:
+          activity-id: sendList
+      content: Sent
