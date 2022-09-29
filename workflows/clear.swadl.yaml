@@ -1,0 +1,9 @@
+id: clear
+
+activities:
+  - send-message:
+      id: clearMessage
+      on:
+        message-received:
+          content: /clear
+      content: "<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"

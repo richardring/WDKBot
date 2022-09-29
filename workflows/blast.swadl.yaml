@@ -3,6 +3,10 @@ id: blast
 variables:
   message: ""
   attachment: []
+  blastStreams:
+    - "4QuCIKOG5QQFFdOw-PEvUn___nyAl5cddA"
+    - "qRLhWJKEFt2IsptGTI03yH___nybXNMLdA"
+    - "rF/uTqb63mEfH2rVXnt+RX///nx27cSOdA=="
 
 activities:
   - send-message:
@@ -52,6 +56,7 @@ activities:
       on:
         form-replied:
           form-id: create
+          exclusive: true
       content: "Now post your message to this room that you wish to send and include any attachments."
 
   - execute-script:
@@ -88,6 +93,7 @@ activities:
       on:
         form-replied:
           form-id: confirmMessage
+          exclusive: true
       script: |
 
   - update-message:
@@ -99,22 +105,37 @@ activities:
           activity-id: workAround2
       content: Cancelled
 
-  - send-message:
+  - update-message:
       id: sendPending
       if: ${confirmMessage.action=='send'}
+      message-id: ${confirmMessage.outputs.msgId}
       on:
         activity-completed:
           activity-id: workAround2
       content: Sending...
 
   - send-message:
-      id: sendList
+      id: sendListText
+      if: ${create.Template=='Text Message' || create.Template=='List Message'}
       on:
         activity-completed:
           activity-id: sendPending
       to:
-        stream-id: "4QuCIKOG5QQFFdOw-PEvUn___nyAl5cddA"
+        stream-ids: ${variables.blastStreams}
       content: ${variables.message}
+      # text template here
+      attachments:
+        - message-id: ${variables.attachment}
+
+  - send-message:
+      id: sendListButton
+      on:
+        activity-completed:
+          activity-id: sendPending
+      to:
+        stream-ids: ${variables.blastStreams}
+      content: ${variables.message}
+      # button template here
       attachments:
         - message-id: ${variables.attachment}
 
@@ -122,6 +143,9 @@ activities:
       id: sendConfirm
       message-id: ${sendPending.outputs.msgId}
       on:
-        activity-completed:
-          activity-id: sendList
+        one-of:
+          - activity-completed:
+              activity-id: sendListText
+          - activity-completed:
+              activity-id: sendListButton
       content: Sent
