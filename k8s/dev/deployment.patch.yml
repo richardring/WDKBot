@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bot-customer-blast
+spec:
+  selector:
+    matchLabels:
+      app: bot-customer-blast
+  template:
+    spec:
+      containers:
+        - name: bot-customer-blast
+          resources:
+            requests:
+              cpu: 20m
+            limits:
+              cpu: 100m
+          envFrom:
+            - configMapRef:
+                name: bot-customer-blast-config

@@ -1,0 +1,6 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: bot-customer-blast-nsp
+  labels:
+    name: bot-customer-blast-nsp

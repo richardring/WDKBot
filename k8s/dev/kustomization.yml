@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: bot-customer-blast-nsp
+resources:
+  - ../base
+  - bot-config.yml
+secretGenerator:
+  - name: bot-customer-blast-private-key
+    files:
+      - privatekey.pem
+patches:
+  - path: deployment.patch.yml
